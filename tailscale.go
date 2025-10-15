@@ -14,11 +14,15 @@ type TailscaleClient struct {
 }
 
 type Device struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Hostname string `json:"hostname"`
-	Online   bool   `json:"online"`
-	LastSeen string `json:"lastSeen"`
+	ID       string    `json:"id"`
+	Name     string    `json:"name"`
+	Hostname string    `json:"hostname"`
+	LastSeen time.Time `json:"lastSeen"`
+}
+
+// Online returns true if the device was seen within the last 5 minutes
+func (d *Device) Online() bool {
+	return time.Since(d.LastSeen) < 5*time.Minute
 }
 
 type DevicesResponse struct {

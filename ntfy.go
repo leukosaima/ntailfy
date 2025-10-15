@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -37,17 +36,22 @@ func NewNtfyClient(baseURL, topic, authToken string) *NtfyClient {
 func (n *NtfyClient) Send(msg *NtfyMessage) error {
 	url := fmt.Sprintf("%s/%s", n.baseURL, n.topic)
 	
-	body, err := json.Marshal(msg)
-	if err != nil {
-		return fmt.Errorf("marshaling message: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	// Send the message body as plain text, with metadata in headers
+	req, err := http.NewRequest("POST", url, bytes.NewBufferString(msg.Message))
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	// Set title and priority as headers
+	if msg.Title != "" {
+		req.Header.Set("Title", msg.Title)
+	}
+	if msg.Priority > 0 {
+		req.Header.Set("Priority", fmt.Sprintf("%d", msg.Priority))
+	}
+	if len(msg.Tags) > 0 {
+		req.Header.Set("Tags", strings.Join(msg.Tags, ","))
+	}
 	
 	if n.authToken != "" {
 		req.Header.Set("Authorization", "Bearer "+n.authToken)

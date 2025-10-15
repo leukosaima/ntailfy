@@ -10,6 +10,7 @@ type Monitor struct {
 	tailscale      *TailscaleClient
 	ntfy           *NtfyClient
 	previousStates map[string]bool // deviceID -> online status
+	pollCount      int
 }
 
 func NewMonitor(config *Config) *Monitor {
@@ -34,6 +35,7 @@ func (m *Monitor) Start() {
 }
 
 func (m *Monitor) poll() {
+	m.pollCount++
 	devices, err := m.tailscale.GetDevices()
 	if err != nil {
 		log.Printf("Error fetching devices: %v", err)
@@ -41,21 +43,26 @@ func (m *Monitor) poll() {
 	}
 
 	currentStates := make(map[string]bool)
+	onlineCount := 0
 	
 	for _, device := range devices {
-		currentStates[device.ID] = device.Online
+		isOnline := device.Online()
+		currentStates[device.ID] = isOnline
+		if isOnline {
+			onlineCount++
+		}
 		
 		previousOnline, existed := m.previousStates[device.ID]
 		
 		if !existed {
 			// New device discovered
-			log.Printf("New device discovered: %s (%s) - %s", device.Name, device.Hostname, onlineStatus(device.Online))
+			log.Printf("New device discovered: %s (%s) - %s", device.Name, device.Hostname, onlineStatus(isOnline))
 			continue
 		}
 		
 		// Check for state change
-		if previousOnline != device.Online {
-			m.notifyStateChange(device)
+		if previousOnline != isOnline {
+			m.notifyStateChange(device, isOnline)
 		}
 	}
 
@@ -67,14 +74,19 @@ func (m *Monitor) poll() {
 	}
 
 	m.previousStates = currentStates
+	
+	// Log heartbeat every 10 polls to confirm it's working
+	if m.pollCount%10 == 0 {
+		log.Printf("Heartbeat: monitoring %d devices (%d online, %d offline)", len(devices), onlineCount, len(devices)-onlineCount)
+	}
 }
 
-func (m *Monitor) notifyStateChange(device Device) {
+func (m *Monitor) notifyStateChange(device Device, isOnline bool) {
 	status := "disconnected"
 	priority := 3 // default
 	tags := []string{"tailscale"}
 	
-	if device.Online {
+	if isOnline {
 		status = "connected"
 		priority = 3
 		tags = append(tags, "connected", "green_circle")
