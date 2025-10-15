@@ -1,0 +1,13 @@
+services:
+  ntailfy:
+    build: .
+    image: ntailfy:latest
+    container_name: ntailfy
+    restart: unless-stopped
+    environment:
+      - TAILSCALE_API_KEY=${TAILSCALE_API_KEY}
+      - TAILSCALE_TAILNET=${TAILSCALE_TAILNET}
+      - NTFY_URL=${NTFY_URL}
+      - NTFY_AUTH_TOKEN=${NTFY_AUTH_TOKEN}
+      - NTFY_TOPIC=${NTFY_TOPIC}
+      - POLL_INTERVAL=${POLL_INTERVAL:-60s}
