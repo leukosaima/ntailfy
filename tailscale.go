@@ -20,9 +20,9 @@ type Device struct {
 	LastSeen time.Time `json:"lastSeen"`
 }
 
-// Online returns true if the device was seen within the last 5 minutes
+// Online returns true if the device was seen within the last 7 minutes
 func (d *Device) Online() bool {
-	return time.Since(d.LastSeen) < 5*time.Minute
+	return time.Since(d.LastSeen) < 7*time.Minute
 }
 
 type DevicesResponse struct {
