@@ -32,7 +32,7 @@ Set the following environment variables:
 | `NTFY_AUTH_TOKEN` | ntfy auth token | No | `tk_xxxxxxxxxxxxx` |
 | `NTFY_TOPIC` | ntfy topic to publish to | Yes | `tailscale-alerts` |
 | `POLL_INTERVAL` | How often to check (min 10s) | No | `60s` (default) |
-| `DEVICE_FILTER` | Comma-separated device names to monitor | No | `server1,laptop,phone` |
+| `DEVICE_FILTER` | Comma-separated device hostnames to monitor | No | `server1,server2,server3` |
 
 ### Running
 

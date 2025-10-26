@@ -47,7 +47,7 @@ func (m *Monitor) poll() {
 	
 	for _, device := range devices {
 		// Skip devices not in filter (if filter is configured)
-		if !m.config.ShouldMonitorDevice(device.Name) {
+		if !m.config.ShouldMonitorDevice(device.Hostname) {
 			continue
 		}
 		

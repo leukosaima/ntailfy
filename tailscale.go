@@ -13,23 +13,16 @@ type TailscaleClient struct {
 	client  *http.Client
 }
 
-type ClientConnectivity struct {
-	ConnectedToControl bool `json:"connectedToControl"`
-}
-
 type Device struct {
-	ID                 string              `json:"id"`
-	Name               string              `json:"name"`
-	Hostname           string              `json:"hostname"`
-	ClientConnectivity *ClientConnectivity `json:"clientConnectivity"`
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
+	Hostname           string `json:"hostname"`
+	ConnectedToControl bool   `json:"connectedToControl"`
 }
 
 // Online returns true if the device is connected to the control plane
 func (d *Device) Online() bool {
-	if d.ClientConnectivity == nil {
-		return false
-	}
-	return d.ClientConnectivity.ConnectedToControl
+	return d.ConnectedToControl
 }
 
 type DevicesResponse struct {

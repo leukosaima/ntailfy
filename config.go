@@ -34,13 +34,13 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// ShouldMonitorDevice returns true if the device should be monitored
-func (c *Config) ShouldMonitorDevice(deviceName string) bool {
+// ShouldMonitorDevice returns true if the device should be monitored based on hostname
+func (c *Config) ShouldMonitorDevice(hostname string) bool {
 	if len(c.DeviceFilter) == 0 {
 		return true // Monitor all devices if no filter specified
 	}
-	for _, name := range c.DeviceFilter {
-		if name == deviceName {
+	for _, filterHostname := range c.DeviceFilter {
+		if filterHostname == hostname {
 			return true
 		}
 	}
