@@ -17,7 +17,7 @@ type Device struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Hostname string `json:"hostname"`
-	ConnectedToControl bool `json:"clientConnectivity.controlConnected"`
+	ConnectedToControl bool `json:"clientConnectivity.connectedToControl"`
 }
 
 // Online returns true if the device is connected to the control plane
