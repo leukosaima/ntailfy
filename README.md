@@ -32,6 +32,7 @@ Set the following environment variables:
 | `NTFY_AUTH_TOKEN` | ntfy auth token | No | `tk_xxxxxxxxxxxxx` |
 | `NTFY_TOPIC` | ntfy topic to publish to | Yes | `tailscale-alerts` |
 | `POLL_INTERVAL` | How often to check (min 10s) | No | `60s` (default) |
+| `DEVICE_FILTER` | Comma-separated device names to monitor | No | `server1,laptop,phone` |
 
 ### Running
 
@@ -84,7 +85,7 @@ docker-compose up -d
 ## How it works
 
 1. Polls the Tailscale API at the configured interval (default: 60s)
-2. Determines device online status based on `lastSeen` timestamp (online = seen within last 7 minutes)
+2. Determines device online status based on `clientConnectivity.controlConnected` field
 3. Compares current device states with previous poll
 4. Sends a notification to ntfy when a device state changes (connected/disconnected)
 5. Logs a heartbeat every 10 polls showing device counts
@@ -98,7 +99,7 @@ docker-compose up -d
 Tailscale supports webhooks for device events on paid plans. This tool uses polling which works on all plan tiers (free included). The API is rate-limited, so keep your polling interval reasonable (60s recommended).
 
 ### Device Online Status
-Devices are considered "online" if their `lastSeen` timestamp is within the last 7 minutes. This matches Tailscale's own definition of online status.
+Devices are considered "online" if they are actively connected to the Tailscale control plane (`clientConnectivity.controlConnected` is true). This directly reflects the device's real-time connection status.
 
 ### Authentication
 This service uses ntfy auth tokens (not username/password). Create a token in your ntfy instance's web UI under Account → Access Tokens.

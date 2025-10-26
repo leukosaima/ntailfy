@@ -12,6 +12,7 @@ type Config struct {
 	NtfyAuthToken    string
 	NtfyTopic        string
 	PollInterval     time.Duration
+	DeviceFilter     []string // If empty, monitor all devices
 }
 
 func (c *Config) Validate() error {
@@ -31,4 +32,17 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("POLL_INTERVAL must be at least 10s")
 	}
 	return nil
+}
+
+// ShouldMonitorDevice returns true if the device should be monitored
+func (c *Config) ShouldMonitorDevice(deviceName string) bool {
+	if len(c.DeviceFilter) == 0 {
+		return true // Monitor all devices if no filter specified
+	}
+	for _, name := range c.DeviceFilter {
+		if name == deviceName {
+			return true
+		}
+	}
+	return false
 }

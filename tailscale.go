@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 type TailscaleClient struct {
@@ -14,15 +13,15 @@ type TailscaleClient struct {
 }
 
 type Device struct {
-	ID       string    `json:"id"`
-	Name     string    `json:"name"`
-	Hostname string    `json:"hostname"`
-	LastSeen time.Time `json:"lastSeen"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Hostname string `json:"hostname"`
+	ConnectedToControl bool `json:"clientConnectivity.controlConnected"`
 }
 
-// Online returns true if the device was seen within the last 7 minutes
+// Online returns true if the device is connected to the control plane
 func (d *Device) Online() bool {
-	return time.Since(d.LastSeen) < 7*time.Minute
+	return d.ConnectedToControl
 }
 
 type DevicesResponse struct {

@@ -46,6 +46,11 @@ func (m *Monitor) poll() {
 	onlineCount := 0
 	
 	for _, device := range devices {
+		// Skip devices not in filter (if filter is configured)
+		if !m.config.ShouldMonitorDevice(device.Name) {
+			continue
+		}
+		
 		isOnline := device.Online()
 		currentStates[device.ID] = isOnline
 		if isOnline {
