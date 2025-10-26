@@ -126,7 +126,7 @@ jobs:
           
           # Add latest tag info only for stable releases
           if [ "${{ github.event.release.prerelease }}" == "false" ]; then
-            RELEASE_BODY="${RELEASE_BODY}\
+            RELEASE_BODY="${RELEASE_BODY}
             - \`latest\`"
           fi
           
