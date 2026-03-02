@@ -70,7 +70,9 @@ jobs:
         with:
           context: .
           platforms: ${{ env.PLATFORMS }}
-          push: true 
+          push: true
+          sbom: true
+          provenance: mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
