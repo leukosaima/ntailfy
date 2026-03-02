@@ -35,7 +35,7 @@ func NewNtfyClient(baseURL, topic, authToken string) *NtfyClient {
 
 func (n *NtfyClient) Send(msg *NtfyMessage) error {
 	url := fmt.Sprintf("%s/%s", n.baseURL, n.topic)
-	
+
 	// Send the message body as plain text, with metadata in headers
 	req, err := http.NewRequest("POST", url, bytes.NewBufferString(msg.Message))
 	if err != nil {
@@ -52,7 +52,7 @@ func (n *NtfyClient) Send(msg *NtfyMessage) error {
 	if len(msg.Tags) > 0 {
 		req.Header.Set("Tags", strings.Join(msg.Tags, ","))
 	}
-	
+
 	if n.authToken != "" {
 		req.Header.Set("Authorization", "Bearer "+n.authToken)
 	}

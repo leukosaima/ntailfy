@@ -11,14 +11,21 @@ import (
 
 func main() {
 	// Load configuration from environment variables
+	scope := os.Getenv("TAILSCALE_OAUTH_SCOPE")
+	if scope == "" {
+		scope = "devices:core:read"
+	}
+
 	config := &Config{
-		TailscaleAPIKey:  os.Getenv("TAILSCALE_API_KEY"),
-		TailscaleTailnet: os.Getenv("TAILSCALE_TAILNET"),
-		NtfyURL:          os.Getenv("NTFY_URL"),
-		NtfyAuthToken:    os.Getenv("NTFY_AUTH_TOKEN"),
-		NtfyTopic:        os.Getenv("NTFY_TOPIC"),
-		PollInterval:     getEnvDuration("POLL_INTERVAL", 60*time.Second),
-		DeviceFilter:     getEnvStringList("DEVICE_FILTER"),
+		TailscaleOAuthClientID:     os.Getenv("TAILSCALE_OAUTH_CLIENT_ID"),
+		TailscaleOAuthClientSecret: os.Getenv("TAILSCALE_OAUTH_CLIENT_SECRET"),
+		TailscaleOAuthScope:        scope,
+		TailscaleTailnet:           os.Getenv("TAILSCALE_TAILNET"),
+		NtfyURL:                    os.Getenv("NTFY_URL"),
+		NtfyAuthToken:              os.Getenv("NTFY_AUTH_TOKEN"),
+		NtfyTopic:                  os.Getenv("NTFY_TOPIC"),
+		PollInterval:               getEnvDuration("POLL_INTERVAL", 60*time.Second),
+		DeviceFilter:               getEnvStringList("DEVICE_FILTER"),
 	}
 
 	if err := config.Validate(); err != nil {

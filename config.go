@@ -6,18 +6,23 @@ import (
 )
 
 type Config struct {
-	TailscaleAPIKey  string
-	TailscaleTailnet string
-	NtfyURL          string
-	NtfyAuthToken    string
-	NtfyTopic        string
-	PollInterval     time.Duration
-	DeviceFilter     []string // If empty, monitor all devices
+	TailscaleOAuthClientID     string
+	TailscaleOAuthClientSecret string
+	TailscaleOAuthScope        string
+	TailscaleTailnet           string
+	NtfyURL                    string
+	NtfyAuthToken              string
+	NtfyTopic                  string
+	PollInterval               time.Duration
+	DeviceFilter               []string // If empty, monitor all devices
 }
 
 func (c *Config) Validate() error {
-	if c.TailscaleAPIKey == "" {
-		return fmt.Errorf("TAILSCALE_API_KEY is required")
+	if c.TailscaleOAuthClientID == "" {
+		return fmt.Errorf("TAILSCALE_OAUTH_CLIENT_ID is required")
+	}
+	if c.TailscaleOAuthClientSecret == "" {
+		return fmt.Errorf("TAILSCALE_OAUTH_CLIENT_SECRET is required")
 	}
 	if c.TailscaleTailnet == "" {
 		return fmt.Errorf("TAILSCALE_TAILNET is required")
