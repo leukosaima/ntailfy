@@ -16,7 +16,7 @@ type Monitor struct {
 func NewMonitor(config *Config) *Monitor {
 	return &Monitor{
 		config:         config,
-		tailscale:      NewTailscaleClient(config.TailscaleAPIKey, config.TailscaleTailnet),
+		tailscale:      NewTailscaleClient(config),
 		ntfy:           NewNtfyClient(config.NtfyURL, config.NtfyTopic, config.NtfyAuthToken),
 		previousStates: make(map[string]bool),
 	}
@@ -44,27 +44,27 @@ func (m *Monitor) poll() {
 
 	currentStates := make(map[string]bool)
 	onlineCount := 0
-	
+
 	for _, device := range devices {
 		// Skip devices not in filter (if filter is configured)
 		if !m.config.ShouldMonitorDevice(device.Hostname) {
 			continue
 		}
-		
+
 		isOnline := device.Online()
 		currentStates[device.ID] = isOnline
 		if isOnline {
 			onlineCount++
 		}
-		
+
 		previousOnline, existed := m.previousStates[device.ID]
-		
+
 		if !existed {
 			// New device discovered
 			log.Printf("New device discovered: %s (%s) - %s", device.Name, device.Hostname, onlineStatus(isOnline))
 			continue
 		}
-		
+
 		// Check for state change
 		if previousOnline != isOnline {
 			m.notifyStateChange(device, isOnline)
@@ -79,7 +79,7 @@ func (m *Monitor) poll() {
 	}
 
 	m.previousStates = currentStates
-	
+
 	// Log heartbeat every 10 polls to confirm it's working
 	if m.pollCount%10 == 0 {
 		log.Printf("Heartbeat: monitoring %d devices (%d online, %d offline)", len(devices), onlineCount, len(devices)-onlineCount)
@@ -90,7 +90,7 @@ func (m *Monitor) notifyStateChange(device Device, isOnline bool) {
 	status := "disconnected"
 	priority := 3 // default
 	tags := []string{"tailscale"}
-	
+
 	if isOnline {
 		status = "connected"
 		priority = 3

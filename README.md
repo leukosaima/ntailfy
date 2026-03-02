@@ -16,7 +16,8 @@ A Go service that monitors your Tailscale tailnet and sends notifications to ntf
 ### Prerequisites
 
 - Go 1.23 or later (or Docker)
-- Tailscale API key ([create one here](https://login.tailscale.com/admin/settings/keys))
+- Tailscale OAuth client (Trust Credential) ([Trust credentials](https://tailscale.com/docs/reference/trust-credentials), [OAuth clients](https://tailscale.com/docs/features/oauth-clients))
+  - When creating the OAuth client in the Tailscale admin UI, allow at least the `devices:core:read` scope (this app calls `GET /api/v2/tailnet/:tailnet/devices`).
 - Self-hosted ntfy instance
 - ntfy auth token ([create in ntfy web UI](https://docs.ntfy.sh/publish/#access-tokens))
 
@@ -26,7 +27,9 @@ Set the following environment variables:
 
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
-| `TAILSCALE_API_KEY` | Your Tailscale API key | Yes | `tskey-api-xxx` |
+| `TAILSCALE_OAUTH_CLIENT_ID` | Tailscale OAuth client ID | Yes | `<client-id>` |
+| `TAILSCALE_OAUTH_CLIENT_SECRET` | Tailscale OAuth client secret | Yes | `<client-secret>` |
+| `TAILSCALE_OAUTH_SCOPE` | OAuth scope(s) to request from the token endpoint (space-delimited). Must be allowed by the OAuth client you created in the Tailscale admin UI. | No | `devices:core:read` |
 | `TAILSCALE_TAILNET` | Your tailnet name | Yes | `example.com` or `user@example.com` |
 | `NTFY_URL` | Your ntfy instance URL | Yes | `https://ntfy.example.com` |
 | `NTFY_AUTH_TOKEN` | ntfy auth token | No | `tk_xxxxxxxxxxxxx` |
@@ -38,7 +41,9 @@ Set the following environment variables:
 
 ```bash
 # Set environment variables
-$env:TAILSCALE_API_KEY="your-api-key"
+$env:TAILSCALE_OAUTH_CLIENT_ID="your-client-id"
+$env:TAILSCALE_OAUTH_CLIENT_SECRET="your-client-secret"
+$env:TAILSCALE_OAUTH_SCOPE="devices:core:read"
 $env:TAILSCALE_TAILNET="your-tailnet"
 $env:NTFY_URL="https://ntfy.example.com"
 $env:NTFY_AUTH_TOKEN="your-auth-token"
@@ -65,7 +70,9 @@ docker build -t ntailfy .
 
 # Run the container
 docker run -d --name ntailfy \
-  -e TAILSCALE_API_KEY="your-api-key" \
+  -e TAILSCALE_OAUTH_CLIENT_ID="your-client-id" \
+  -e TAILSCALE_OAUTH_CLIENT_SECRET="your-client-secret" \
+  -e TAILSCALE_OAUTH_SCOPE="devices:core:read" \
   -e TAILSCALE_TAILNET="your-tailnet" \
   -e NTFY_URL="https://ntfy.example.com" \
   -e NTFY_AUTH_TOKEN="your-auth-token" \
@@ -97,6 +104,15 @@ docker-compose up -d
 
 ### Tailscale API
 Tailscale supports webhooks for device events on paid plans. This tool uses polling which works on all plan tiers (free included). The API is rate-limited, so keep your polling interval reasonable (60s recommended).
+
+### Tailscale OAuth scopes
+You select the OAuth client's allowed scopes in the Tailscale admin UI. At runtime, this app requests an access token from `https://api.tailscale.com/api/v2/oauth/token` and includes `TAILSCALE_OAUTH_SCOPE` (defaults to `devices:core:read`).
+
+If you change `TAILSCALE_OAUTH_SCOPE`, make sure the OAuth client is permitted to grant that scope; otherwise the token request will fail.
+
+See:
+- https://tailscale.com/docs/features/oauth-clients
+- https://tailscale.com/docs/reference/trust-credentials
 
 ### Device Online Status
 Devices are considered "online" if they are actively connected to the Tailscale control plane (`connectedToControl` is true). This directly reflects the device's real-time connection status.
