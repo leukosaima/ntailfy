@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>leukosaima/renovate"],
   "prConcurrentLimit": 5,
-  "packageRules": []
+  "packageRules": [
+    {
+      "description": "Bump the go.mod go directive to the latest Go version",
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang"],
+      "rangeStrategy": "bump"
+    }
+  ]
 }
